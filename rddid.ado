@@ -1,11 +1,11 @@
-*! version 2.0.0  Jonathan Dries  01Feb2026
+*! version 2.1.0  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
     syntax varlist(min=2 max=2 numeric) [if] [in], ///
         Group(varname) ///
         [ h(numlist max=4) bw(string) Est(string) Bootstrap Reps(integer 50) ///
-          vce(string) * ]
+          c(real 0) Seed(integer -1) BWSelect(string) vce(string) * ]
 
     marksample touse
     markout `touse' `group'
@@ -33,10 +33,16 @@ program define rddid, eclass
         }
     }
 
-    * Build rdrobust options: passthrough options + vce
-    local rd_options `"`options'"'
+    * Build rdrobust options: passthrough options + cutoff + vce
+    local rd_options `"`options' c(`c')"'
     if `"`vce_opt'"' != "" {
         local rd_options `"`rd_options' `vce_opt'"'
+    }
+
+    * Build bwselect option for rdbwselect calls
+    local bwsel_opt ""
+    if "`bwselect'" != "" {
+        local bwsel_opt `"bwselect(`bwselect')"'
     }
 
     * --- Bandwidth Selection Logic ---
@@ -71,14 +77,14 @@ program define rddid, eclass
         * AUTOMATIC OPTIMAL BANDWIDTHS
         di as txt "Calculating optimal bandwidths (`bw')..."
 
-        quietly rdbwselect `y' `x' if `group'==1 & `touse', `rd_options'
+        quietly rdbwselect `y' `x' if `group'==1 & `touse', `rd_options' `bwsel_opt'
         local h_t = e(h_mserd)
 
         if "`bw'" == "common" {
             local h_c = `h_t'
         }
         else if "`bw'" == "independent" {
-            quietly rdbwselect `y' `x' if `group'==0 & `touse', `rd_options'
+            quietly rdbwselect `y' `x' if `group'==0 & `touse', `rd_options' `bwsel_opt'
             local h_c = e(h_mserd)
         }
         else {
@@ -94,6 +100,10 @@ program define rddid, eclass
             di as txt "Cluster bootstrap on: `bs_cluster'"
         }
         di as txt "Bootstrapping `reps' replications..."
+
+        if `seed' != -1 {
+            set seed `seed'
+        }
 
         * --- Original-sample point estimate ---
         quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
@@ -213,8 +223,11 @@ program define rddid, eclass
         ereturn scalar N = `N_t' + `N_c'
         ereturn scalar N_t = `N_t'
         ereturn scalar N_c = `N_c'
+        ereturn scalar tau_t = `b_t_orig'
+        ereturn scalar tau_c = `b_c_orig'
         ereturn scalar bs_reps = `reps'
         ereturn scalar bs_good = `bs_good'
+        ereturn matrix bs_dist = `bs_results'
         ereturn local bw_type "`bw'"
         ereturn local vce "bootstrap"
         ereturn local estimation "`est'"
@@ -300,6 +313,8 @@ program define rddid, eclass
         ereturn scalar se_t = `se_t'
         ereturn scalar tau_c = `b_c'
         ereturn scalar se_c = `se_c'
+        ereturn local bw_type "`bw'"
+        ereturn local vce "analytic"
         ereturn local estimation "`est'"
         ereturn local cmd "rddid"
     }
