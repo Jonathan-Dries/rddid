@@ -13,6 +13,5 @@ d Author: Jonathan Dries
 d Support: jvdries@luiss.it
 d
 f rddid.ado
-f rddid_calc.ado
 f rddid_post_bw.ado
 f rddid.sthlp

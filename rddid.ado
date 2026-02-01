@@ -1,11 +1,10 @@
-*! version 1.4.2  Jonathan Dries  01Feb2026
+*! version 1.5.0  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
     syntax varlist(min=2 max=2 numeric) [if] [in], ///
         Group(varname) ///
-        [ h(numlist max=4) bw(string) Est(string) Bootstrap Reps(integer 50) ///
-          vce(string) * ]
+        [ h(numlist max=4) bw(string) Est(string) * ]
 
     marksample touse
     markout `touse' `group'
@@ -18,25 +17,6 @@ program define rddid, eclass
     if !inlist("`est'", "robust", "conventional", "biascorrected") {
         di as err "Option est() must be 'robust', 'conventional', or 'biascorrected'"
         exit 198
-    }
-
-    * --- Parse vce() ---
-    * Extract cluster variable if vce(cluster varname) was specified
-    local bs_cluster ""
-    local vce_opt ""
-    if `"`vce'"' != "" {
-        local vce_opt `"vce(`vce')"'
-        * Check if it's vce(cluster ...)
-        gettoken vce_type vce_rest : vce
-        if "`vce_type'" == "cluster" | "`vce_type'" == "cl" {
-            local bs_cluster "`vce_rest'"
-        }
-    }
-
-    * Build rdrobust options: passthrough options + vce
-    local rd_options `"`options'"'
-    if `"`vce_opt'"' != "" {
-        local rd_options `"`rd_options' `vce_opt'"'
     }
 
     * --- Bandwidth Selection Logic ---
@@ -71,14 +51,14 @@ program define rddid, eclass
         * AUTOMATIC OPTIMAL BANDWIDTHS
         di as txt "Calculating optimal bandwidths (`bw')..."
 
-        quietly rdbwselect `y' `x' if `group'==1 & `touse', `rd_options'
+        quietly rdbwselect `y' `x' if `group'==1 & `touse', `options'
         local h_t = e(h_mserd)
 
         if "`bw'" == "common" {
             local h_c = `h_t'
         }
         else if "`bw'" == "independent" {
-            quietly rdbwselect `y' `x' if `group'==0 & `touse', `rd_options'
+            quietly rdbwselect `y' `x' if `group'==0 & `touse', `options'
             local h_c = e(h_mserd)
         }
         else {
@@ -87,134 +67,82 @@ program define rddid, eclass
         }
     }
 
-    * --- Estimation ---
-    if "`bootstrap'" != "" {
-
-        * Build bootstrap prefix options
-        local bs_opts "reps(`reps') nowarn"
-        if "`bs_cluster'" != "" {
-            tempvar bs_id
-            local bs_opts `"`bs_opts' cluster(`bs_cluster') idcluster(`bs_id')"'
-            di as txt "Cluster bootstrap on: `bs_cluster'"
-        }
-
-        di as txt "Bootstrapping `reps' replications..."
-
-        * Pass options and est via globals to avoid argument-splitting
-        * by the bootstrap prefix (compound quotes don't survive)
-        global RDDID_OPTS `"`options'"'
-        global RDDID_EST "`est'"
-
-        bootstrap diff=r(diff), `bs_opts': ///
-            rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse'
-
-        macro drop RDDID_OPTS RDDID_EST
-
-        * Get sample sizes from a single run (use full rd_options here)
-        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
-        local N_t = e(N)
-        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `rd_options'
-        local N_c = e(N)
-
-        di _n as txt "Diff-in-Disc Results (Bootstrap, `est')"
-        di as txt "{hline 56}"
-        di as txt "Estimation type:         " as res "`est'"
-        if "`bs_cluster'" != "" {
-            di as txt "Bootstrap clustering:     " as res "`bs_cluster'"
-        }
-        di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
-        di as txt "Control Bandwidth (L/R): " as res "`h_c'"
-        di as txt "N (Treated / Control):   " as res "`N_t' / `N_c'"
-        di as txt "{hline 56}"
-
-        ereturn scalar N_t = `N_t'
-        ereturn scalar N_c = `N_c'
-        ereturn local bw_type "`bw'"
-        ereturn local vce "bootstrap"
-        ereturn local estimation "`est'"
-
-        rddid_post_bw, ht(`h_t') hc(`h_c')
-
-        ereturn local cmd "rddid"
+    * --- Analytic SEs ---
+    quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `options'
+    local N_t = e(N)
+    if "`est'" == "conventional" {
+        local b_t = e(tau_cl)
+        local se_t = e(se_tau_cl)
+    }
+    else if "`est'" == "biascorrected" {
+        local b_t = e(tau_bc)
+        local se_t = e(se_tau_cl)
     }
     else {
-        * --- Analytic SEs ---
-        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
-        local N_t = e(N)
-        if "`est'" == "conventional" {
-            local b_t = e(tau_cl)
-            local se_t = e(se_tau_cl)
-        }
-        else if "`est'" == "biascorrected" {
-            local b_t = e(tau_bc)
-            local se_t = e(se_tau_cl)
-        }
-        else {
-            local b_t = e(tau_bc)
-            local se_t = e(se_tau_rb)
-        }
-
-        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `rd_options'
-        local N_c = e(N)
-        if "`est'" == "conventional" {
-            local b_c = e(tau_cl)
-            local se_c = e(se_tau_cl)
-        }
-        else if "`est'" == "biascorrected" {
-            local b_c = e(tau_bc)
-            local se_c = e(se_tau_cl)
-        }
-        else {
-            local b_c = e(tau_bc)
-            local se_c = e(se_tau_rb)
-        }
-
-        local diff = `b_t' - `b_c'
-        local se_diff = sqrt(`se_t'^2 + `se_c'^2)
-        local z = `diff' / `se_diff'
-        local p = 2 * (1 - normal(abs(`z')))
-
-        local z_t = `b_t' / `se_t'
-        local p_t = 2 * (1 - normal(abs(`z_t')))
-        local z_c = `b_c' / `se_c'
-        local p_c = 2 * (1 - normal(abs(`z_c')))
-
-        * --- Display Results Table ---
-        di _n as txt "Diff-in-Disc Results (`est')"
-        di as txt "{hline 56}"
-        di as txt %18s "" as txt "    Coef.   Std. Err.      z    P>|z|"
-        di as txt "{hline 56}"
-        di as txt %18s "Treated RD" "  " as res %9.4f `b_t' "  " %9.4f `se_t' ///
-           "  " %6.2f `z_t' "  " %6.4f `p_t'
-        di as txt %18s "Control RD" "  " as res %9.4f `b_c' "  " %9.4f `se_c' ///
-           "  " %6.2f `z_c' "  " %6.4f `p_c'
-        di as txt "{hline 56}"
-        di as txt %18s "{bf:DiDC}" "  " as res %9.4f `diff' "  " %9.4f `se_diff' ///
-           "  " %6.2f `z' "  " %6.4f `p'
-        di as txt "{hline 56}"
-        di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
-        di as txt "Control Bandwidth (L/R): " as res "`h_c'"
-        di as txt "N (Treated / Control):   " as res "`N_t' / `N_c'"
-
-        tempname b V
-        matrix `b' = (`diff')
-        matrix `V' = (`se_diff'^2)
-        matrix colnames `b' = diff
-        matrix colnames `V' = diff
-        matrix rownames `V' = diff
-
-        ereturn post `b' `V', esample(`touse')
-
-        rddid_post_bw, ht(`h_t') hc(`h_c')
-
-        ereturn scalar N = `N_t' + `N_c'
-        ereturn scalar N_t = `N_t'
-        ereturn scalar N_c = `N_c'
-        ereturn scalar tau_t = `b_t'
-        ereturn scalar se_t = `se_t'
-        ereturn scalar tau_c = `b_c'
-        ereturn scalar se_c = `se_c'
-        ereturn local estimation "`est'"
-        ereturn local cmd "rddid"
+        local b_t = e(tau_bc)
+        local se_t = e(se_tau_rb)
     }
+
+    quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `options'
+    local N_c = e(N)
+    if "`est'" == "conventional" {
+        local b_c = e(tau_cl)
+        local se_c = e(se_tau_cl)
+    }
+    else if "`est'" == "biascorrected" {
+        local b_c = e(tau_bc)
+        local se_c = e(se_tau_cl)
+    }
+    else {
+        local b_c = e(tau_bc)
+        local se_c = e(se_tau_rb)
+    }
+
+    local diff = `b_t' - `b_c'
+    local se_diff = sqrt(`se_t'^2 + `se_c'^2)
+    local z = `diff' / `se_diff'
+    local p = 2 * (1 - normal(abs(`z')))
+
+    local z_t = `b_t' / `se_t'
+    local p_t = 2 * (1 - normal(abs(`z_t')))
+    local z_c = `b_c' / `se_c'
+    local p_c = 2 * (1 - normal(abs(`z_c')))
+
+    * --- Display Results Table ---
+    di _n as txt "Diff-in-Disc Results (`est')"
+    di as txt "{hline 56}"
+    di as txt %18s "" as txt "    Coef.   Std. Err.      z    P>|z|"
+    di as txt "{hline 56}"
+    di as txt %18s "Treated RD" "  " as res %9.4f `b_t' "  " %9.4f `se_t' ///
+       "  " %6.2f `z_t' "  " %6.4f `p_t'
+    di as txt %18s "Control RD" "  " as res %9.4f `b_c' "  " %9.4f `se_c' ///
+       "  " %6.2f `z_c' "  " %6.4f `p_c'
+    di as txt "{hline 56}"
+    di as txt %18s "{bf:DiDC}" "  " as res %9.4f `diff' "  " %9.4f `se_diff' ///
+       "  " %6.2f `z' "  " %6.4f `p'
+    di as txt "{hline 56}"
+    di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
+    di as txt "Control Bandwidth (L/R): " as res "`h_c'"
+    di as txt "N (Treated / Control):   " as res "`N_t' / `N_c'"
+
+    tempname b V
+    matrix `b' = (`diff')
+    matrix `V' = (`se_diff'^2)
+    matrix colnames `b' = diff
+    matrix colnames `V' = diff
+    matrix rownames `V' = diff
+
+    ereturn post `b' `V', esample(`touse')
+
+    rddid_post_bw, ht(`h_t') hc(`h_c')
+
+    ereturn scalar N = `N_t' + `N_c'
+    ereturn scalar N_t = `N_t'
+    ereturn scalar N_c = `N_c'
+    ereturn scalar tau_t = `b_t'
+    ereturn scalar se_t = `se_t'
+    ereturn scalar tau_c = `b_c'
+    ereturn scalar se_c = `se_c'
+    ereturn local estimation "`est'"
+    ereturn local cmd "rddid"
 end
