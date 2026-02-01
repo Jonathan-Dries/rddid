@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 2.1.0  01Feb2026}{...}
+{* *! version 2.2.0  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -141,6 +141,11 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 {synopt :{cmd:e(b)}}the Difference-in-Discontinuities estimate{p_end}
 {synopt :{cmd:e(V)}}variance matrix of the estimate{p_end}
 {synopt :{cmd:e(bs_dist)}}vector of bootstrap replicate estimates (bootstrap only){p_end}
+
+{marker also_see}{...}
+{title:Also see}
+
+{pstd}{help rddidplot:rddidplot} — postestimation command for side-by-side RD plots{p_end}
 
 {marker author}{...}
 {title:Author}

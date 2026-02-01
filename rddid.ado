@@ -1,4 +1,4 @@
-*! version 2.1.0  Jonathan Dries  01Feb2026
+*! version 2.2.0  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
@@ -234,6 +234,10 @@ program define rddid, eclass
 
         rddid_post_bw, ht(`h_t') hc(`h_c')
 
+        ereturn local depvar "`y'"
+        ereturn local runvar "`x'"
+        ereturn local group "`group'"
+        ereturn scalar cutoff = `c'
         ereturn local cmd "rddid"
     }
     else {
@@ -316,6 +320,10 @@ program define rddid, eclass
         ereturn local bw_type "`bw'"
         ereturn local vce "analytic"
         ereturn local estimation "`est'"
+        ereturn local depvar "`y'"
+        ereturn local runvar "`x'"
+        ereturn local group "`group'"
+        ereturn scalar cutoff = `c'
         ereturn local cmd "rddid"
     }
 end

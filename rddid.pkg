@@ -15,4 +15,6 @@ d Support: jvdries@luiss.it
 d
 f rddid.ado
 f rddid_post_bw.ado
+f rddidplot.ado
 f rddid.sthlp
+f rddidplot.sthlp

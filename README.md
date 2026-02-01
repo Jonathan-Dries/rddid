@@ -102,6 +102,19 @@ You can pass standard `rdrobust` options. For example, to use HC1 robust standar
 rddid outcome score, group(treated) vce(hc1)
 ```
 
+## Postestimation: Plots
+
+After running `rddid`, use `rddidplot` to generate side-by-side RD plots for the Treated and Control groups (requires `rdplot` from the rdrobust package):
+
+```stata
+rddid outcome score, group(treated) h(100)
+rddidplot
+rddidplot, title("RD Plots: Wealth Index")
+rddidplot, cilevel(99)
+```
+
+Options: `title()` for a custom title, `cilevel()` for confidence interval level (default 95, set to 0 to disable). See `help rddidplot` for details.
+
 ## Saved Results
 
 The command stores the following in `e()`:
