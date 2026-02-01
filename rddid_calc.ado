@@ -1,7 +1,10 @@
-*! version 1.4.1  Jonathan Dries  01Feb2026
+*! version 1.4.2  Jonathan Dries  01Feb2026
 * Bootstrap helper for rddid
 program define rddid_calc, rclass
-    args y x group h_t h_c touse opts est
+    args y x group h_t h_c touse
+
+    local opts `"$RDDID_OPTS"'
+    local est "$RDDID_EST"
 
     capture rdrobust `y' `x' if `group'==1 & `touse', h(`h_t') `opts'
     if _rc != 0 {

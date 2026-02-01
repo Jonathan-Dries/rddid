@@ -1,4 +1,4 @@
-*! version 1.4.1  Jonathan Dries  01Feb2026
+*! version 1.4.2  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
@@ -100,9 +100,15 @@ program define rddid, eclass
 
         di as txt "Bootstrapping `reps' replications..."
 
-        * Inside bootstrap, pass only non-vce options to rdrobust
+        * Pass options and est via globals to avoid argument-splitting
+        * by the bootstrap prefix (compound quotes don't survive)
+        global RDDID_OPTS `"`options'"'
+        global RDDID_EST "`est'"
+
         bootstrap diff=r(diff), `bs_opts': ///
-            rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse' `"`options'"' `est'
+            rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse'
+
+        macro drop RDDID_OPTS RDDID_EST
 
         * Get sample sizes from a single run (use full rd_options here)
         quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
