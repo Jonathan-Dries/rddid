@@ -1,0 +1,4 @@
+v 3
+d rddid: Difference-in-Discontinuities Estimation
+d Jonathan Dries, LUISS Guido Carli
+p rddid

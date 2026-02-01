@@ -1,0 +1,16 @@
+v 3
+d rddid. Difference-in-Discontinuities Estimation.
+d
+d KW: rdd
+d KW: difference in differences
+d KW: causal inference
+d
+d Requires: Stata version 14
+d
+d Distribution-Date: 20260201
+d
+d Author: Jonathan Dries
+d Support: jvdries@luiss.it
+d
+f rddid.ado
+f rddid.sthlp
