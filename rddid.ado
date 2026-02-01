@@ -1,10 +1,11 @@
-*! version 1.4.0  Jonathan Dries  01Feb2026
+*! version 1.4.1  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
     syntax varlist(min=2 max=2 numeric) [if] [in], ///
         Group(varname) ///
-        [ h(numlist max=4) bw(string) Est(string) Bootstrap Reps(integer 50) * ]
+        [ h(numlist max=4) bw(string) Est(string) Bootstrap Reps(integer 50) ///
+          vce(string) * ]
 
     marksample touse
     markout `touse' `group'
@@ -17,6 +18,25 @@ program define rddid, eclass
     if !inlist("`est'", "robust", "conventional", "biascorrected") {
         di as err "Option est() must be 'robust', 'conventional', or 'biascorrected'"
         exit 198
+    }
+
+    * --- Parse vce() ---
+    * Extract cluster variable if vce(cluster varname) was specified
+    local bs_cluster ""
+    local vce_opt ""
+    if `"`vce'"' != "" {
+        local vce_opt `"vce(`vce')"'
+        * Check if it's vce(cluster ...)
+        gettoken vce_type vce_rest : vce
+        if "`vce_type'" == "cluster" | "`vce_type'" == "cl" {
+            local bs_cluster "`vce_rest'"
+        }
+    }
+
+    * Build rdrobust options: passthrough options + vce
+    local rd_options `"`options'"'
+    if `"`vce_opt'"' != "" {
+        local rd_options `"`rd_options' `vce_opt'"'
     }
 
     * --- Bandwidth Selection Logic ---
@@ -51,14 +71,14 @@ program define rddid, eclass
         * AUTOMATIC OPTIMAL BANDWIDTHS
         di as txt "Calculating optimal bandwidths (`bw')..."
 
-        quietly rdbwselect `y' `x' if `group'==1 & `touse', `options'
+        quietly rdbwselect `y' `x' if `group'==1 & `touse', `rd_options'
         local h_t = e(h_mserd)
 
         if "`bw'" == "common" {
             local h_c = `h_t'
         }
         else if "`bw'" == "independent" {
-            quietly rdbwselect `y' `x' if `group'==0 & `touse', `options'
+            quietly rdbwselect `y' `x' if `group'==0 & `touse', `rd_options'
             local h_c = e(h_mserd)
         }
         else {
@@ -69,20 +89,33 @@ program define rddid, eclass
 
     * --- Estimation ---
     if "`bootstrap'" != "" {
+
+        * Build bootstrap prefix options
+        local bs_opts "reps(`reps') nowarn"
+        if "`bs_cluster'" != "" {
+            tempvar bs_id
+            local bs_opts `"`bs_opts' cluster(`bs_cluster') idcluster(`bs_id')"'
+            di as txt "Cluster bootstrap on: `bs_cluster'"
+        }
+
         di as txt "Bootstrapping `reps' replications..."
 
-        bootstrap diff=r(diff), reps(`reps') nowarn: ///
+        * Inside bootstrap, pass only non-vce options to rdrobust
+        bootstrap diff=r(diff), `bs_opts': ///
             rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse' `"`options'"' `est'
 
-        * Get sample sizes from a single run
-        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `options'
+        * Get sample sizes from a single run (use full rd_options here)
+        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
         local N_t = e(N)
-        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `options'
+        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `rd_options'
         local N_c = e(N)
 
         di _n as txt "Diff-in-Disc Results (Bootstrap, `est')"
         di as txt "{hline 56}"
         di as txt "Estimation type:         " as res "`est'"
+        if "`bs_cluster'" != "" {
+            di as txt "Bootstrap clustering:     " as res "`bs_cluster'"
+        }
         di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
         di as txt "Control Bandwidth (L/R): " as res "`h_c'"
         di as txt "N (Treated / Control):   " as res "`N_t' / `N_c'"
@@ -100,7 +133,7 @@ program define rddid, eclass
     }
     else {
         * --- Analytic SEs ---
-        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `options'
+        quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `rd_options'
         local N_t = e(N)
         if "`est'" == "conventional" {
             local b_t = e(tau_cl)
@@ -115,7 +148,7 @@ program define rddid, eclass
             local se_t = e(se_tau_rb)
         }
 
-        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `options'
+        quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `rd_options'
         local N_c = e(N)
         if "`est'" == "conventional" {
             local b_c = e(tau_cl)

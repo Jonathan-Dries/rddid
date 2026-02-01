@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.4.0  01Feb2026}{...}
+{* *! version 1.4.1  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -58,7 +58,7 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {opt est(string)} selects the estimation type. The default is {opt robust}, which uses bias-corrected point estimates with robust standard errors following Calonico, Cattaneo, and Titiunik (2014). {opt conventional} uses conventional point estimates and standard errors. {opt biascorrected} uses bias-corrected point estimates with conventional standard errors. Can be abbreviated as {opt est()}.
 
 {phang}
-{opt bootstrap} calculates standard errors using a bootstrap procedure (resampling the data). If this is not specified, the command calculates analytic standard errors assuming independence between the two groups.
+{opt bootstrap} calculates standard errors using a bootstrap procedure. If this is not specified, the command calculates analytic standard errors assuming independence between the two groups. When combined with {cmd:vce(cluster {it:varname})}, the bootstrap resamples whole clusters rather than individual observations (cluster bootstrap). In the analytic path, {cmd:vce()} is passed directly to {cmd:rdrobust}.
 
 {phang}
 {opt reps(int)} specifies the number of bootstrap replications. The default is 50. This option is only relevant when {opt bootstrap} is specified.
