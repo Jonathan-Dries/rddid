@@ -5,7 +5,7 @@ d KW: rdd
 d KW: difference in differences
 d KW: causal inference
 d
-d Requires: Stata version 14
+d Requires: Stata version 14, rdrobust
 d
 d Distribution-Date: 20260201
 d

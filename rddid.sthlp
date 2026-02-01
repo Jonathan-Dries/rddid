@@ -4,6 +4,8 @@
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
 {viewerjumpto "Examples" "rddid##examples"}{...}
+{viewerjumpto "Saved Results" "rddid##saved_results"}{...}
+{viewerjumpto "Author" "rddid##author"}{...}
 {title:Title}
 
 {p2colset 5 18 20 2}{...}
@@ -46,13 +48,16 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {opt bw(string)} specifies how bandwidths are calculated if {opt h()} is not used. {opt common} calculates the optimal bandwidth for the Treated group and applies it to the Control group. {opt independent} calculates separate optimal bandwidths for each group.
 
 {phang}
-{opt h(numlist)} allows manual specification of bandwidths. It accepts three formats:{p_end}
+{opt h(numlist)} allows manual specification of bandwidths. If specified, this overrides {opt bw()}. It accepts three formats:{p_end}
 {phang2}* {bf:1 number} (e.g., {cmd:h(5)}): Sets a symmetric bandwidth of 5.0 for both Treated and Control groups.{p_end}
 {phang2}* {bf:2 numbers} (e.g., {cmd:h(5 10)}): Sets a symmetric bandwidth of 5.0 for the Treated group and 10.0 for the Control group.{p_end}
 {phang2}* {bf:4 numbers} (e.g., {cmd:h(1 2 3 4)}): Sets fully asymmetric bandwidths. Treated group uses 1 (Left) and 2 (Right). Control group uses 3 (Left) and 4 (Right).{p_end}
 
 {phang}
 {opt bootstrap} calculates standard errors using a bootstrap procedure (resampling the data). If this is not specified, the command calculates analytic standard errors assuming independence between the two groups.
+
+{phang}
+{opt reps(int)} specifies the number of bootstrap replications. The default is 50. This option is only relevant when {opt bootstrap} is specified.
 
 {phang}
 {it:rdrobust_options} allow you to customize the underlying estimation. For example, if you want analytic standard errors clustered by a variable, you can pass {cmd:vce(cluster id)} directly.
@@ -75,6 +80,29 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {phang}5. Analytic SEs with specific rdrobust options (e.g., HC1){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) vce(hc1)}{p_end}
 
+{marker saved_results}{...}
+{title:Saved Results}
+
+{pstd}{cmd:rddid} stores the following in {cmd:e()}:
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2: Scalars}{p_end}
+{synopt :{cmd:e(N)}}total sample size{p_end}
+{synopt :{cmd:e(h_t_l)}}bandwidth for Treated group (left of cutoff){p_end}
+{synopt :{cmd:e(h_t_r)}}bandwidth for Treated group (right of cutoff){p_end}
+{synopt :{cmd:e(h_c_l)}}bandwidth for Control group (left of cutoff){p_end}
+{synopt :{cmd:e(h_c_r)}}bandwidth for Control group (right of cutoff){p_end}
+
+{p2col 5 20 24 2: Macros}{p_end}
+{synopt :{cmd:e(cmd)}}{cmd:rddid}{p_end}
+{synopt :{cmd:e(bw_type)}}bandwidth selection method ({cmd:common} or {cmd:independent}){p_end}
+{synopt :{cmd:e(vce)}}{cmd:bootstrap} if bootstrapped standard errors were used{p_end}
+
+{p2col 5 20 24 2: Matrices}{p_end}
+{synopt :{cmd:e(b)}}the Difference-in-Discontinuities estimate{p_end}
+{synopt :{cmd:e(V)}}variance matrix of the estimate{p_end}
+
+{marker author}{...}
 {title:Author}
 {pstd}Jonathan Dries{p_end}
 {pstd}LUISS Guido Carli University{p_end}

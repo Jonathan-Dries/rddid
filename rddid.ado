@@ -73,12 +73,18 @@ program define rddid, eclass
         bootstrap diff=r(diff), reps(`reps') nowarn: ///
             rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse' `"`options'"'
             
+        di _n as txt "Diff-in-Disc Results (Bootstrap)"
+        di as txt "{hline 46}"
+        di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
+        di as txt "Control Bandwidth (L/R): " as res "`h_c'"
+        di as txt "{hline 46}"
+
         ereturn local bw_type "`bw'"
         ereturn local vce "bootstrap"
-        
+
         * Helper to post bandwidth scalars (handles 1 or 2 numbers)
         _rddid_post_bw, ht(`h_t') hc(`h_c')
-        
+
         ereturn local cmd "rddid"
     }
     else {
@@ -113,7 +119,8 @@ program define rddid, eclass
         matrix `V' = (`se_diff'^2)
         matrix colnames `b' = diff
         matrix colnames `V' = diff
-        
+        matrix rownames `V' = diff
+
         ereturn post `b' `V', esample(`touse')
         
         _rddid_post_bw, ht(`h_t') hc(`h_c')
@@ -128,11 +135,17 @@ program define rddid_calc, rclass
     args y x group h_t h_c touse opts
     
     capture rdrobust `y' `x' if `group'==1 & `touse', h(`h_t') `opts'
-    if _rc != 0 return scalar diff = . 
+    if _rc != 0 {
+        return scalar diff = .
+        exit
+    }
     local b_t = e(tau_cl)
-    
+
     capture rdrobust `y' `x' if `group'==0 & `touse', h(`h_c') `opts'
-    if _rc != 0 return scalar diff = .
+    if _rc != 0 {
+        return scalar diff = .
+        exit
+    }
     local b_c = e(tau_cl)
     
     return scalar diff = `b_t' - `b_c'
