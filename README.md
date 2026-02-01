@@ -87,11 +87,19 @@ The command stores the following in `e()`:
 
 | Result | Description |
 |--------|-------------|
-| `e(b)` | The Difference-in-Discontinuities estimate |
-| `e(V)` | The variance matrix |
 | `e(N)` | Total sample size |
+| `e(N_t)`, `e(N_c)` | Sample sizes for Treated and Control groups |
+| `e(tau_t)`, `e(se_t)` | RD estimate and SE for Treated group (analytic only) |
+| `e(tau_c)`, `e(se_c)` | RD estimate and SE for Control group (analytic only) |
 | `e(h_t_l)`, `e(h_t_r)` | Bandwidths for Treated (Left/Right) |
 | `e(h_c_l)`, `e(h_c_r)` | Bandwidths for Control (Left/Right) |
+
+**Matrices:**
+
+| Result | Description |
+|--------|-------------|
+| `e(b)` | The Difference-in-Discontinuities estimate |
+| `e(V)` | The variance matrix |
 
 ## Author
 

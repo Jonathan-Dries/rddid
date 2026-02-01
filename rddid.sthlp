@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.3.0  01Feb2026}{...}
+{* *! version 1.4.0  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -95,6 +95,12 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Scalars}{p_end}
 {synopt :{cmd:e(N)}}total sample size{p_end}
+{synopt :{cmd:e(N_t)}}sample size for Treated group{p_end}
+{synopt :{cmd:e(N_c)}}sample size for Control group{p_end}
+{synopt :{cmd:e(tau_t)}}RD estimate for Treated group (analytic only){p_end}
+{synopt :{cmd:e(se_t)}}standard error for Treated group (analytic only){p_end}
+{synopt :{cmd:e(tau_c)}}RD estimate for Control group (analytic only){p_end}
+{synopt :{cmd:e(se_c)}}standard error for Control group (analytic only){p_end}
 {synopt :{cmd:e(h_t_l)}}bandwidth for Treated group (left of cutoff){p_end}
 {synopt :{cmd:e(h_t_r)}}bandwidth for Treated group (right of cutoff){p_end}
 {synopt :{cmd:e(h_c_l)}}bandwidth for Control group (left of cutoff){p_end}
