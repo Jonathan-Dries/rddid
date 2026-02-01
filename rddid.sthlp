@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.0  01Feb2026}{...}
+{* *! version 2.0.0  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -25,6 +25,8 @@
 {synopt :{opt bw(string)}}Bandwidth selection method: {opt common} (default) or {opt independent}.{p_end}
 {synopt :{opt h(numlist)}}Manually specify bandwidths. Accepts 1, 2, or 4 numbers to control symmetric or asymmetric bandwidths per group.{p_end}
 {synopt :{opt est(string)}}Estimation type: {opt robust} (default), {opt conventional}, or {opt biascorrected}.{p_end}
+{synopt :{opt bootstrap}}Request bootstrapped standard errors (default is analytic).{p_end}
+{synopt :{opt reps(int)}}Number of bootstrap replications (default 50).{p_end}
 {synopt :{it:rdrobust_options}}Any other options (e.g., {opt vce(hc1)}, {opt kernel(...)}) are passed directly to {cmd:rdrobust}.{p_end}
 {synoptline}
 
@@ -38,7 +40,9 @@
 It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 
 {pstd}
-Standard errors are computed analytically assuming independence between groups. This assumption is appropriate when groups correspond to distinct units (e.g., different countries or boundaries) rather than the same units observed at different times.
+Without the {opt bootstrap} option, analytic standard errors are computed assuming independence between groups.
+This assumption is appropriate when groups correspond to distinct units (e.g., different countries or boundaries).
+When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to obtain valid standard errors.
 
 {marker options}{...}
 {title:Options}
@@ -59,7 +63,13 @@ Standard errors are computed analytically assuming independence between groups. 
 {opt est(string)} selects the estimation type. The default is {opt robust}, which uses bias-corrected point estimates with robust standard errors following Calonico, Cattaneo, and Titiunik (2014). {opt conventional} uses conventional point estimates and standard errors. {opt biascorrected} uses bias-corrected point estimates with conventional standard errors. Can be abbreviated as {opt est()}.
 
 {phang}
-{it:rdrobust_options} allow you to customize the underlying estimation. For example, you can pass {cmd:vce(cluster id)} to cluster standard errors within each group's RD estimation.
+{opt bootstrap} calculates standard errors using a bootstrap procedure. If this is not specified, the command calculates analytic standard errors assuming independence between the two groups. When combined with {cmd:vce(cluster {it:varname})}, the bootstrap resamples whole clusters rather than individual observations (cluster bootstrap). In the analytic path, {cmd:vce()} is passed directly to {cmd:rdrobust}.
+
+{phang}
+{opt reps(int)} specifies the number of bootstrap replications. The default is 50. This option is only relevant when {opt bootstrap} is specified.
+
+{phang}
+{it:rdrobust_options} allow you to customize the underlying estimation. For example, you can pass {cmd:vce(cluster id)} to cluster standard errors within each group's RD estimation, or {cmd:covs({it:varlist})} to include covariates.
 
 {marker examples}{...}
 {title:Examples}
@@ -73,10 +83,16 @@ Standard errors are computed analytically assuming independence between groups. 
 {phang}3. Manual asymmetric bandwidths (Treated: 5 Left/10 Right; Control: 5 Left/5 Right){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) h(5 10 5 5)}{p_end}
 
-{phang}4. Conventional estimation (non-bias-corrected){p_end}
+{phang}4. Bootstrapped standard errors (200 reps){p_end}
+{phang}{cmd:. rddid outcome score, group(treated) bootstrap reps(200)}{p_end}
+
+{phang}5. Bootstrapped standard errors with cluster resampling{p_end}
+{phang}{cmd:. rddid outcome score, group(treated) bootstrap reps(200) vce(cluster id)}{p_end}
+
+{phang}6. Conventional estimation (non-bias-corrected){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) est(conventional)}{p_end}
 
-{phang}5. Analytic SEs with specific rdrobust options (e.g., HC1){p_end}
+{phang}7. Analytic SEs with specific rdrobust options (e.g., HC1){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) vce(hc1)}{p_end}
 
 {marker saved_results}{...}
@@ -89,10 +105,10 @@ Standard errors are computed analytically assuming independence between groups. 
 {synopt :{cmd:e(N)}}total sample size{p_end}
 {synopt :{cmd:e(N_t)}}sample size for Treated group{p_end}
 {synopt :{cmd:e(N_c)}}sample size for Control group{p_end}
-{synopt :{cmd:e(tau_t)}}RD estimate for Treated group{p_end}
-{synopt :{cmd:e(se_t)}}standard error for Treated group{p_end}
-{synopt :{cmd:e(tau_c)}}RD estimate for Control group{p_end}
-{synopt :{cmd:e(se_c)}}standard error for Control group{p_end}
+{synopt :{cmd:e(tau_t)}}RD estimate for Treated group (analytic only){p_end}
+{synopt :{cmd:e(se_t)}}standard error for Treated group (analytic only){p_end}
+{synopt :{cmd:e(tau_c)}}RD estimate for Control group (analytic only){p_end}
+{synopt :{cmd:e(se_c)}}standard error for Control group (analytic only){p_end}
 {synopt :{cmd:e(h_t_l)}}bandwidth for Treated group (left of cutoff){p_end}
 {synopt :{cmd:e(h_t_r)}}bandwidth for Treated group (right of cutoff){p_end}
 {synopt :{cmd:e(h_c_l)}}bandwidth for Control group (left of cutoff){p_end}
@@ -100,7 +116,9 @@ Standard errors are computed analytically assuming independence between groups. 
 
 {p2col 5 20 24 2: Macros}{p_end}
 {synopt :{cmd:e(cmd)}}{cmd:rddid}{p_end}
+{synopt :{cmd:e(bw_type)}}bandwidth selection method ({cmd:common} or {cmd:independent}){p_end}
 {synopt :{cmd:e(estimation)}}estimation type ({cmd:robust}, {cmd:conventional}, or {cmd:biascorrected}){p_end}
+{synopt :{cmd:e(vce)}}{cmd:bootstrap} if bootstrapped standard errors were used{p_end}
 
 {p2col 5 20 24 2: Matrices}{p_end}
 {synopt :{cmd:e(b)}}the Difference-in-Discontinuities estimate{p_end}
