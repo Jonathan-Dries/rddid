@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.0  01Feb2026}{...}
+{* *! version 1.2.1  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}

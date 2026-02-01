@@ -1,4 +1,4 @@
-*! version 1.2.0  Jonathan Dries  01Feb2026
+*! version 1.2.1  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
     
