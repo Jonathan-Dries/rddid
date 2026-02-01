@@ -1,18 +1,23 @@
-*! version 1.2.1  Jonathan Dries  01Feb2026
+*! version 1.3.0  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
-    
-    * CHANGE: Increased max h() to 4
+
     syntax varlist(min=2 max=2 numeric) [if] [in], ///
         Group(varname) ///
-        [ h(numlist max=4) bw(string) Bootstrap Reps(integer 50) * ]
+        [ h(numlist max=4) bw(string) Est(string) Bootstrap Reps(integer 50) * ]
 
     marksample touse
     markout `touse' `group'
-    
+
     gettoken y x : varlist
-    
+
     if "`bw'" == "" local bw "common"
+    if "`est'" == "" local est "robust"
+
+    if !inlist("`est'", "robust", "conventional", "biascorrected") {
+        di as err "Option est() must be 'robust', 'conventional', or 'biascorrected'"
+        exit 198
+    }
 
     * --- Bandwidth Selection Logic ---
     local n_h : word count `h'
@@ -71,16 +76,18 @@ program define rddid, eclass
         
         * NOTE: We wrap h_t and h_c in quotes to handle cases like "5 10" safely
         bootstrap diff=r(diff), reps(`reps') nowarn: ///
-            rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse' `"`options'"'
+            rddid_calc `y' `x' `group' "`h_t'" "`h_c'" `touse' `"`options'"' `est'
             
-        di _n as txt "Diff-in-Disc Results (Bootstrap)"
+        di _n as txt "Diff-in-Disc Results (Bootstrap, `est')"
         di as txt "{hline 46}"
+        di as txt "Estimation type:         " as res "`est'"
         di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
         di as txt "Control Bandwidth (L/R): " as res "`h_c'"
         di as txt "{hline 46}"
 
         ereturn local bw_type "`bw'"
         ereturn local vce "bootstrap"
+        ereturn local estimation "`est'"
 
         * Helper to post bandwidth scalars (handles 1 or 2 numbers)
         _rddid_post_bw, ht(`h_t') hc(`h_c')
@@ -90,22 +97,43 @@ program define rddid, eclass
     else {
         * --- Analytic SEs ---
         quietly rdrobust `y' `x' if `group' == 1 & `touse', h(`h_t') `options'
-        local b_t = e(tau_cl)
-        local se_t = e(se_tau_cl)
         local N_t = e(N)
-        
+        if "`est'" == "conventional" {
+            local b_t = e(tau_cl)
+            local se_t = e(se_tau_cl)
+        }
+        else if "`est'" == "biascorrected" {
+            local b_t = e(tau_bc)
+            local se_t = e(se_tau_cl)
+        }
+        else {
+            local b_t = e(tau_bc)
+            local se_t = e(se_tau_rb)
+        }
+
         quietly rdrobust `y' `x' if `group' == 0 & `touse', h(`h_c') `options'
-        local b_c = e(tau_cl)
-        local se_c = e(se_tau_cl)
         local N_c = e(N)
+        if "`est'" == "conventional" {
+            local b_c = e(tau_cl)
+            local se_c = e(se_tau_cl)
+        }
+        else if "`est'" == "biascorrected" {
+            local b_c = e(tau_bc)
+            local se_c = e(se_tau_cl)
+        }
+        else {
+            local b_c = e(tau_bc)
+            local se_c = e(se_tau_rb)
+        }
         
         local diff = `b_t' - `b_c'
         local se_diff = sqrt(`se_t'^2 + `se_c'^2)
         local z = `diff' / `se_diff'
         local p = 2 * (1 - normal(abs(`z')))
         
-        di _n as txt "Diff-in-Disc Results"
+        di _n as txt "Diff-in-Disc Results (`est')"
         di as txt "{hline 46}"
+        di as txt "Estimation type:         " as res "`est'"
         di as txt "Treated Bandwidth (L/R): " as res "`h_t'"
         di as txt "Control Bandwidth (L/R): " as res "`h_c'"
         di as txt "{hline 46}"
@@ -126,27 +154,38 @@ program define rddid, eclass
         _rddid_post_bw, ht(`h_t') hc(`h_c')
         
         ereturn scalar N = `N_t' + `N_c'
+        ereturn local estimation "`est'"
         ereturn local cmd "rddid"
     }
 end
 
 * --- Helper: Calculation Program ---
 program define rddid_calc, rclass
-    args y x group h_t h_c touse opts
-    
+    args y x group h_t h_c touse opts est
+
     capture rdrobust `y' `x' if `group'==1 & `touse', h(`h_t') `opts'
     if _rc != 0 {
         return scalar diff = .
         exit
     }
-    local b_t = e(tau_cl)
+    if "`est'" == "conventional" {
+        local b_t = e(tau_cl)
+    }
+    else {
+        local b_t = e(tau_bc)
+    }
 
     capture rdrobust `y' `x' if `group'==0 & `touse', h(`h_c') `opts'
     if _rc != 0 {
         return scalar diff = .
         exit
     }
-    local b_c = e(tau_cl)
+    if "`est'" == "conventional" {
+        local b_c = e(tau_cl)
+    }
+    else {
+        local b_c = e(tau_bc)
+    }
     
     return scalar diff = `b_t' - `b_c'
 end

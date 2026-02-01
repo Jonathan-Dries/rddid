@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.1  01Feb2026}{...}
+{* *! version 1.3.0  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -24,6 +24,7 @@
 {synopt :{opth group(varname)}}Variable indicating treatment (1) vs control (0) group; {bf:required}.{p_end}
 {synopt :{opt bw(string)}}Bandwidth selection method: {opt common} (default) or {opt independent}.{p_end}
 {synopt :{opt h(numlist)}}Manually specify bandwidths. Accepts 1, 2, or 4 numbers to control symmetric or asymmetric bandwidths per group.{p_end}
+{synopt :{opt est(string)}}Estimation type: {opt robust} (default), {opt conventional}, or {opt biascorrected}.{p_end}
 {synopt :{opt bootstrap}}Request bootstrapped standard errors (default is analytic).{p_end}
 {synopt :{opt reps(int)}}Number of bootstrap replications (default 50).{p_end}
 {synopt :{it:rdrobust_options}}Any other options (e.g., {opt vce(hc1)}, {opt kernel(...)}) are passed directly to {cmd:rdrobust}.{p_end}
@@ -54,6 +55,9 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {phang2}* {bf:4 numbers} (e.g., {cmd:h(1 2 3 4)}): Sets fully asymmetric bandwidths. Treated group uses 1 (Left) and 2 (Right). Control group uses 3 (Left) and 4 (Right).{p_end}
 
 {phang}
+{opt est(string)} selects the estimation type. The default is {opt robust}, which uses bias-corrected point estimates with robust standard errors following Calonico, Cattaneo, and Titiunik (2014). {opt conventional} uses conventional point estimates and standard errors. {opt biascorrected} uses bias-corrected point estimates with conventional standard errors. Can be abbreviated as {opt est()}.
+
+{phang}
 {opt bootstrap} calculates standard errors using a bootstrap procedure (resampling the data). If this is not specified, the command calculates analytic standard errors assuming independence between the two groups.
 
 {phang}
@@ -77,7 +81,10 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {phang}4. Bootstrapped standard errors (200 reps){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) bootstrap reps(200)}{p_end}
 
-{phang}5. Analytic SEs with specific rdrobust options (e.g., HC1){p_end}
+{phang}5. Conventional estimation (non-bias-corrected){p_end}
+{phang}{cmd:. rddid outcome score, group(treated) est(conventional)}{p_end}
+
+{phang}6. Analytic SEs with specific rdrobust options (e.g., HC1){p_end}
 {phang}{cmd:. rddid outcome score, group(treated) vce(hc1)}{p_end}
 
 {marker saved_results}{...}
@@ -96,6 +103,7 @@ It relies on {cmd:rdrobust} for underlying estimation and bandwidth selection.
 {p2col 5 20 24 2: Macros}{p_end}
 {synopt :{cmd:e(cmd)}}{cmd:rddid}{p_end}
 {synopt :{cmd:e(bw_type)}}bandwidth selection method ({cmd:common} or {cmd:independent}){p_end}
+{synopt :{cmd:e(estimation)}}estimation type ({cmd:robust}, {cmd:conventional}, or {cmd:biascorrected}){p_end}
 {synopt :{cmd:e(vce)}}{cmd:bootstrap} if bootstrapped standard errors were used{p_end}
 
 {p2col 5 20 24 2: Matrices}{p_end}
