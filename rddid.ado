@@ -127,7 +127,7 @@ program define rddid, eclass
         ereturn local vce "bootstrap"
         ereturn local estimation "`est'"
 
-        _rddid_post_bw, ht(`h_t') hc(`h_c')
+        rddid_post_bw, ht(`h_t') hc(`h_c')
 
         ereturn local cmd "rddid"
     }
@@ -199,7 +199,7 @@ program define rddid, eclass
 
         ereturn post `b' `V', esample(`touse')
 
-        _rddid_post_bw, ht(`h_t') hc(`h_c')
+        rddid_post_bw, ht(`h_t') hc(`h_c')
 
         ereturn scalar N = `N_t' + `N_c'
         ereturn scalar N_t = `N_t'
