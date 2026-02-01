@@ -7,7 +7,7 @@
 You can install this package directly from GitHub:
 
 ```stata
-net install rddid, from("[https://raw.githubusercontent.com/Jonathan-Dries/rddid/main](https://raw.githubusercontent.com/Jonathan-Dries/rddid/main)") replace
+net install rddid, from("https://raw.githubusercontent.com/Jonathan-Dries/rddid/main") replace
 ```
 
 ## Syntax
