@@ -1,4 +1,4 @@
-*! version 2.2.0  Jonathan Dries  01Feb2026
+*! version 2.2.1  Jonathan Dries  01Feb2026
 program define rddid, eclass
     version 14.0
 
@@ -88,8 +88,8 @@ program define rddid, eclass
             local h_c = e(h_mserd)
         }
         else {
-             di as err "Option bw() must be 'common' or 'independent'"
-             exit 198
+            di as err "Option bw() must be 'common' or 'independent'"
+            exit 198
         }
     }
 

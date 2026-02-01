@@ -1,2 +1,5 @@
 test_rddid.do
 legacy/
+~*.stswp
+.DS_Store
+*.log

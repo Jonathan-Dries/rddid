@@ -1,4 +1,4 @@
-*! version 2.2.0  Jonathan Dries  01Feb2026
+*! version 2.2.1  Jonathan Dries  01Feb2026
 program define rddidplot
     version 14.0
 
@@ -33,12 +33,12 @@ program define rddidplot
     }
 
     * Treated plot
-    rdplot `depvar' `runvar' if `group'==1 & e(sample), ///
+    quietly rdplot `depvar' `runvar' if `group'==1 & e(sample), ///
         c(`cutoff') h(`h_t_l' `h_t_r') `ci_opt' ///
         graph_options(title("Treated") legend(off) name(__rddid_t, replace))
 
     * Control plot
-    rdplot `depvar' `runvar' if `group'==0 & e(sample), ///
+    quietly rdplot `depvar' `runvar' if `group'==0 & e(sample), ///
         c(`cutoff') h(`h_c_l' `h_c_r') `ci_opt' ///
         graph_options(title("Control") legend(off) name(__rddid_c, replace))
 

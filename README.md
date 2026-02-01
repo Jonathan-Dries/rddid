@@ -109,7 +109,7 @@ After running `rddid`, use `rddidplot` to generate side-by-side RD plots for the
 ```stata
 rddid outcome score, group(treated) h(100)
 rddidplot
-rddidplot, title("RD Plots: Wealth Index")
+rddidplot, title("RD Plots: Dependent Variable")
 rddidplot, cilevel(99)
 ```
 
@@ -129,6 +129,7 @@ The command stores the following in `e()`:
 | `e(se_t)`, `e(se_c)` | Standard errors for Treated and Control groups (analytic only) |
 | `e(h_t_l)`, `e(h_t_r)` | Bandwidths for Treated (Left/Right) |
 | `e(h_c_l)`, `e(h_c_r)` | Bandwidths for Control (Left/Right) |
+| `e(cutoff)` | RD cutoff value |
 | `e(bs_reps)` | Bootstrap replications requested (bootstrap only) |
 | `e(bs_good)` | Successful bootstrap replications (bootstrap only) |
 
@@ -140,6 +141,9 @@ The command stores the following in `e()`:
 | `e(estimation)` | Estimation type (`robust`, `conventional`, or `biascorrected`) |
 | `e(vce)` | `bootstrap` or `analytic` |
 | `e(bw_type)` | Bandwidth method (`common` or `independent`) |
+| `e(depvar)` | Name of dependent variable |
+| `e(runvar)` | Name of running variable |
+| `e(group)` | Name of group variable |
 
 **Matrices:**
 

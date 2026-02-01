@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 2.2.0  01Feb2026}{...}
+{* *! version 2.2.1  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -128,6 +128,7 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 {synopt :{cmd:e(h_t_r)}}bandwidth for Treated group (right of cutoff){p_end}
 {synopt :{cmd:e(h_c_l)}}bandwidth for Control group (left of cutoff){p_end}
 {synopt :{cmd:e(h_c_r)}}bandwidth for Control group (right of cutoff){p_end}
+{synopt :{cmd:e(cutoff)}}RD cutoff value{p_end}
 {synopt :{cmd:e(bs_reps)}}number of bootstrap replications requested (bootstrap only){p_end}
 {synopt :{cmd:e(bs_good)}}number of successful bootstrap replications (bootstrap only){p_end}
 
@@ -136,6 +137,9 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 {synopt :{cmd:e(bw_type)}}bandwidth selection method ({cmd:common} or {cmd:independent}){p_end}
 {synopt :{cmd:e(estimation)}}estimation type ({cmd:robust}, {cmd:conventional}, or {cmd:biascorrected}){p_end}
 {synopt :{cmd:e(vce)}}{cmd:bootstrap} or {cmd:analytic}{p_end}
+{synopt :{cmd:e(depvar)}}name of dependent variable{p_end}
+{synopt :{cmd:e(runvar)}}name of running variable{p_end}
+{synopt :{cmd:e(group)}}name of group variable{p_end}
 
 {p2col 5 20 24 2: Matrices}{p_end}
 {synopt :{cmd:e(b)}}the Difference-in-Discontinuities estimate{p_end}

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 2.2.0  01Feb2026}{...}
+{* *! version 2.2.1  01Feb2026}{...}
 {viewerjumpto "Syntax" "rddidplot##syntax"}{...}
 {viewerjumpto "Description" "rddidplot##description"}{...}
 {viewerjumpto "Options" "rddidplot##options"}{...}
@@ -67,6 +67,11 @@ by {cmd:rddidplot} are passed directly to {cmd:graph combine}. For example, you 
 
 {phang}4. 99% confidence intervals{p_end}
 {phang}{cmd:. rddidplot, cilevel(99)}{p_end}
+
+{marker also_see}{...}
+{title:Also see}
+
+{pstd}{help rddid:rddid} — Difference-in-Discontinuities estimation{p_end}
 
 {marker author}{...}
 {title:Author}

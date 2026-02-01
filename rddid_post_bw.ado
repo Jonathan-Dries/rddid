@@ -1,4 +1,4 @@
-*! version 2.2.0  Jonathan Dries  01Feb2026
+*! version 2.2.1  Jonathan Dries  01Feb2026
 * Helper to post bandwidth scalars to e()
 program define rddid_post_bw, eclass
     syntax, ht(string) hc(string)
