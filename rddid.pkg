@@ -6,6 +6,12 @@ d KW: difference in differences
 d KW: causal inference
 d KW: bootstrap
 d
+d This program implements the estimators described in:
+d "Corporations as the State: Concessions, Urbanization, and Long-Run Development in the Copperbelt"
+d (AEHN Working Paper No. 85, 2025).
+d
+d Please cite this paper when using rddid.
+d
 d Requires: Stata version 14, rdrobust
 d
 d Distribution-Date: 20260201

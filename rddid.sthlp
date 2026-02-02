@@ -151,6 +151,27 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 
 {pstd}{help rddidplot:rddidplot} — postestimation command for side-by-side RD plots{p_end}
 
+{marker citation}{...}
+{title:Citation}
+
+{p 4 4 2}
+Please cite the following paper when using this command:
+
+{p 8 8 2}
+Dries, Jonathan (2025). "Corporations as the State: Concessions, Urbanization, and Long-Run Development in the Copperbelt." {it:African Economic History Network Working Paper No. 85}.
+
+{p 4 4 2}
+Use the following BibTeX entry:
+
+{break}
+@techreport{rddid_2025,
+{break}  title={Corporations as the State: Concessions, Urbanization, and Long-Run Development in the Copperbelt},
+{break}  author={Dries, Jonathan},
+{break}  year={2025},
+{break}  institution={African Economic History Network},
+{break}  type={Working Paper No. 85}
+{break}}
+
 {marker author}{...}
 {title:Author}
 {pstd}Jonathan Dries{p_end}
