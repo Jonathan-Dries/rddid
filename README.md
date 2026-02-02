@@ -4,7 +4,16 @@
 
 ## Installation
 
-You can install the package directly from GitHub:
+**Stable Version**
+
+The latest stable version is available from SSC:
+```stata
+ssc install rddid, replace
+```
+
+**Development Version**
+
+To install the latest development version directly from GitHub:
 
 ```stata
 net install rddid, from("https://raw.githubusercontent.com/Jonathan-Dries/rddid/main") replace
