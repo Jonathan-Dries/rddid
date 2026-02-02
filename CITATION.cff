@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+authors:
+- family-names: "Dries"
+  given-names: "Jonathan"
+title: "rddid: A Stata package to calculate Difference-in-Discontinuities"
+version: 2.2.0
+date-released: 2026-02-02
+preferred-citation:
+  type: report
+  authors:
+  - family-names: "Dries"
+    given-names: "Jonathan"
+  title: "Corporations as the State: Concessions, Urbanization, and Long-Run Development in the Copperbelt"
+  year: 2025
+  institution:
+    name: "African Economic History Network"
+  number: "Working Paper No. 85"
