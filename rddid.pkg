@@ -14,7 +14,7 @@ d Please cite this paper when using rddid.
 d
 d Requires: Stata version 14, rdrobust
 d
-d Distribution-Date: 20260201
+d Distribution-Date: 20260302
 d
 d Author: Jonathan Dries
 d Support: jvdries@luiss.it
@@ -24,3 +24,4 @@ f rddid_post_bw.ado
 f rddidplot.ado
 f rddid.sthlp
 f rddidplot.sthlp
+f rddid_example.dta

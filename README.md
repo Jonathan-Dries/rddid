@@ -19,6 +19,22 @@ To install the latest development version directly from GitHub:
 net install rddid, from("https://raw.githubusercontent.com/Jonathan-Dries/rddid/main") replace
 ```
 
+## Quick Start
+
+The package includes a bundled synthetic dataset (`rddid_example.dta`) from a rural electrification study — two neighboring regions with an electrification zone boundary, true DiDC = 1.5 (tau_treated = 2.0, tau_control = 0.5).
+
+```stata
+findfile rddid_example.dta
+use `r(fn)', clear
+
+rddid income_idx distance, group(group) est(conventional) ///
+    vce(cluster clusterid) covs(female age)
+
+rddidplot
+```
+
+Variables: `income_idx`, `distance` (km from zone boundary), `group` (1 = treated, 0 = control), `clusterid`, `female`, `age`.
+
 ## Syntax
 
 ```stata

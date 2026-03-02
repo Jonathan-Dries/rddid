@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 2.2.1  01Feb2026}{...}
+{* *! version 2.3.0  02Mar2026}{...}
 {viewerjumpto "Syntax" "rddid##syntax"}{...}
 {viewerjumpto "Description" "rddid##description"}{...}
 {viewerjumpto "Options" "rddid##options"}{...}
@@ -86,29 +86,35 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 {marker examples}{...}
 {title:Examples}
 
-{phang}1. Standard estimation (Common bandwidth, analytic SEs){p_end}
-{phang}{cmd:. rddid outcome score, group(treated)}{p_end}
+{pstd}
+The following examples use {cmd:rddid_example}, a bundled synthetic dataset (rural electrification study, true DiDC = 1.5).
 
-{phang}2. Non-zero cutoff{p_end}
-{phang}{cmd:. rddid outcome score, group(treated) c(50)}{p_end}
+{phang}{cmd:. findfile rddid_example.dta}{p_end}
+{phang}{cmd:. use `r(fn)', clear}{p_end}
+
+{phang}1. Standard estimation (common bandwidth, analytic SEs){p_end}
+{phang}{cmd:. rddid income_idx distance, group(group)}{p_end}
+
+{phang}2. Conventional estimation with cluster-robust SEs and covariates{p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) est(conventional) ///}{p_end}
+{phang}{cmd:.     vce(cluster clusterid) covs(female age)}{p_end}
 
 {phang}3. Independent bandwidths for Treated and Control groups{p_end}
-{phang}{cmd:. rddid outcome score, group(treated) bw(independent)}{p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) bw(independent)}{p_end}
 
-{phang}4. Manual asymmetric bandwidths (Treated: 5 Left/10 Right; Control: 5 Left/5 Right){p_end}
-{phang}{cmd:. rddid outcome score, group(treated) h(5 10 5 5)}{p_end}
+{phang}4. Manual asymmetric bandwidths (Treated: 50 Left/75 Right; Control: 40 Left/60 Right){p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) h(50 75 40 60)}{p_end}
 
-{phang}5. Bootstrapped standard errors (200 reps, reproducible){p_end}
-{phang}{cmd:. rddid outcome score, group(treated) bootstrap reps(200) seed(12345)}{p_end}
+{phang}5. Bootstrapped standard errors with cluster resampling (200 reps, reproducible){p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) bootstrap reps(200) seed(42) ///}{p_end}
+{phang}{cmd:.     vce(cluster clusterid)}{p_end}
 
-{phang}6. Bootstrapped standard errors with cluster resampling{p_end}
-{phang}{cmd:. rddid outcome score, group(treated) bootstrap reps(200) vce(cluster id)}{p_end}
+{phang}6. CER-optimal bandwidth selector{p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) bwselect(cerrd)}{p_end}
 
-{phang}7. Conventional estimation (non-bias-corrected){p_end}
-{phang}{cmd:. rddid outcome score, group(treated) est(conventional)}{p_end}
-
-{phang}8. CER-optimal bandwidth selector{p_end}
-{phang}{cmd:. rddid outcome score, group(treated) bwselect(cerrd)}{p_end}
+{phang}7. RD plots (postestimation){p_end}
+{phang}{cmd:. rddid income_idx distance, group(group) est(conventional)}{p_end}
+{phang}{cmd:. rddidplot, title("Rural Electrification: DiDC Estimates")}{p_end}
 
 {marker saved_results}{...}
 {title:Saved Results}
