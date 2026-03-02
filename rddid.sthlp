@@ -87,7 +87,21 @@ When groups share the same units (e.g., panel pre/post), use {opt bootstrap} to 
 {title:Examples}
 
 {pstd}
-The following examples use {cmd:rddid_example}, a bundled synthetic dataset (rural electrification study, true DiDC = 1.5).
+The following examples use {cmd:rddid_example}, a bundled synthetic dataset.
+It simulates a rural electrification policy study in which two neighboring regions each have an
+internal electrification zone boundary. Region A ({cmd:group}=1) implemented an electrification
+program inside its zone; Region B ({cmd:group}=0) did not. The running variable {cmd:distance}
+measures kilometers from the zone boundary (negative = outside, positive = inside), with the
+cutoff at 0. The true DiDC is 1.5 (tau_treated = 2.0, tau_control = 0.5).
+
+{p2colset 9 28 30 2}{...}
+{p2col:{cmd:income_idx}}household income index (outcome){p_end}
+{p2col:{cmd:distance}}km from electrification zone boundary (running variable){p_end}
+{p2col:{cmd:group}}1 = Region A / treated, 0 = Region B / control{p_end}
+{p2col:{cmd:clusterid}}village cluster identifier{p_end}
+{p2col:{cmd:female}}female respondent (1 = yes){p_end}
+{p2col:{cmd:age}}respondent age in years{p_end}
+{p2colreset}{...}
 
 {phang}{cmd:. findfile rddid_example.dta}{p_end}
 {phang}{cmd:. use `r(fn)', clear}{p_end}

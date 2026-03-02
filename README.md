@@ -21,7 +21,16 @@ net install rddid, from("https://raw.githubusercontent.com/Jonathan-Dries/rddid/
 
 ## Quick Start
 
-The package includes a bundled synthetic dataset (`rddid_example.dta`) from a rural electrification study — two neighboring regions with an electrification zone boundary, true DiDC = 1.5 (tau_treated = 2.0, tau_control = 0.5).
+The package includes a bundled synthetic dataset (`rddid_example.dta`) simulating a rural electrification policy study. Two neighboring regions each have an internal electrification zone boundary. Region A (`group=1`) implemented an electrification program inside its zone; Region B (`group=0`) did not. The running variable `distance` measures kilometers from the zone boundary (negative = outside, positive = inside), with the cutoff at 0. The true DiDC is **1.5** (tau_treated = 2.0, tau_control = 0.5).
+
+| Variable | Description |
+|---|---|
+| `income_idx` | Household income index (outcome) |
+| `distance` | Km from electrification zone boundary (running variable) |
+| `group` | 1 = Region A / treated, 0 = Region B / control |
+| `clusterid` | Village cluster identifier |
+| `female` | Female respondent (1 = yes) |
+| `age` | Respondent age in years |
 
 ```stata
 findfile rddid_example.dta
@@ -32,8 +41,6 @@ rddid income_idx distance, group(group) est(conventional) ///
 
 rddidplot
 ```
-
-Variables: `income_idx`, `distance` (km from zone boundary), `group` (1 = treated, 0 = control), `clusterid`, `female`, `age`.
 
 ## Syntax
 
